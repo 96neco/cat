@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>にゃんこ特殊攻略DB</title>
+<style>
+:root {
+  --bg: #f5f6f8;
+  --panel: #fff;
+  --text: #20242b;
+  --muted: #697386;
+  --line: #e2e6ec;
+  --accent: #4169e1;
+  --soft: #edf1ff;
+  --danger: #b42318;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.6 system-ui, sans-serif;
+}
+header {
+  background: #202b45;
+  color: white;
+  padding: 24px max(18px, calc((100% - 1100px)/2));
+}
+header h1 { margin: 0; font-size: clamp(22px, 4vw, 32px); }
+header p { margin: 5px 0 0; color: #d5dced; }
+main {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 20px;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 2px 8px #1d293910;
+}
+h2 { font-size: 18px; margin: 0 0 14px; }
+label {
+  display: block;
+  font-weight: 650;
+  font-size: 13px;
+  margin: 12px 0 5px;
+}
+input, textarea, select {
+  width: 100%;
+  border: 1px solid #cbd2dc;
+  border-radius: 8px;
+  padding: 10px;
+  font: inherit;
+  background: white;
+  color: inherit;
+}
+textarea { min-height: 78px; resize: vertical; }
+button {
+  border: 0;
+  border-radius: 9px;
+  padding: 10px 13px;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  background: var(--accent);
+  color: white;
+}
+button.secondary {
+  background: var(--soft);
+  color: #2846a8;
+}
+button.danger {
+  background: #fff0ef;
+  color: var(--danger);
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.topbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.topbar input { flex: 1; min-width: 180px; }
+.cards { display: grid; gap: 12px; }
+.entry {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 15px;
+  background: white;
+}
+.entry h3 { margin: 0 0 5px; font-size: 17px; }
+.meta { font-size: 12px; color: var(--muted); }
+.entry p { margin: 9px 0; white-space: pre-wrap; }
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 9px 0;
+}
+.tag {
+  font-size: 12px;
+  background: #eef1f5;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.entry-footer {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 12px;
+}
+.status {
+  font-size: 12px;
+  border-radius: 7px;
+  padding: 3px 8px;
+  background: #f1f4f8;
+}
+.empty {
+  padding: 30px;
+  text-align: center;
+  color: var(--muted);
+}
+.private-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+@media (max-width: 800px) {
+  main { grid-template-columns: 1fr; }
+  header { padding: 20px 16px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>🐱 にゃんこ特殊攻略DB</h1>
+  <p>特殊攻略を記録・検索・共有するための個人用アーカイブ</p>
+</header>
+
+<main>
+<section class="panel">
+  <h2 id="formTitle">攻略を追加</h2>
+
+  <form id="entryForm">
+    <input type="hidden" id="editId">
+
+    <label for="stage">ステージ名 *</label>
+    <input id="stage" required placeholder="例：四皇帝の殿堂">
+
+    <label for="chapter">章・分類 / 冠</label>
+    <input id="chapter" placeholder="例：真レジェンド37章・冠1">
+
+    <label for="title">攻略タイトル *</label>
+    <input id="title" required placeholder="例：覚醒ムート1体攻略">
+
+    <label for="conditions">攻略条件</label>
+    <textarea id="conditions" placeholder="編成制限、禁止事項など"></textarea>
+
+    <label for="cats">編成キャラ（カンマ区切り）</label>
+    <input id="cats" placeholder="例：覚醒のネコムート">
+
+    <label for="tags">タグ（カンマ区切り）</label>
+    <input id="tags" placeholder="例：覚醒ムート, 1体攻略, 無課金">
+
+    <label for="status">自分の攻略状況</label>
+    <select id="status">
+      <option>未挑戦</option>
+      <option>挑戦中</option>
+      <option>クリア</option>
+      <option>攻略動画確認済み</option>
+    </select>
+
+    <label for="memo">攻略メモ</label>
+    <textarea id="memo" placeholder="立ち回り・注意点など"></textarea>
+
+    <label for="visibility">公開設定</label>
+    <select id="visibility">
+      <option value="public">公開</option>
+      <option value="private">非公開（自分用）</option>
+    </select>
+
+    <div class="actions">
+      <button type="submit">保存する</button>
+      <button type="button" class="secondary" id="resetBtn">
+        入力をリセット
+      </button>
+    </div>
+
+    <p class="private-note">
+      この試作版はブラウザ内（localStorage）に保存します。
+      データはこの端末・ブラウザに保存され、
+      公開サイトへ自動同期されません。
+    </p>
+  </form>
+</section>
+
+<section>
+<div class="panel">
+  <h2>攻略アーカイブ</h2>
+
+  <div class="topbar">
+    <input id="search"
+      placeholder="ステージ・条件・キャラ・タグで検索">
+
+    <select id="filterStatus" style="max-width:155px">
+      <option value="">すべての状況</option>
+      <option>未挑戦</option>
+      <option>挑戦中</option>
+      <option>クリア</option>
+      <option>攻略動画確認済み</option>
+    </select>
+
+    <select id="filterVisibility" style="max-width:130px">
+      <option value="all">すべて</option>
+      <option value="public">公開のみ</option>
+      <option value="private">非公開のみ</option>
+    </select>
+  </div>
+
+  <div id="entries" class="cards"></div>
+</div>
+</section>
+</main>
+
+<script>
+const KEY = 'nyanko-special-strategy-db-v1';
+let data = load();
+
+const $ = id => document.getElementById(id);
+
+function load() {
+  try {
+    return JSON.parse(localStorage.getItem(KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function persist() {
+  localStorage.setItem(KEY, JSON.stringify(data));
+  render();
+}
+
+function split(s) {
+  return s.split(/[,、]/)
+    .map(x => x.trim())
+    .filter(Boolean);
+}
+
+function escapeHtml(s = '') {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[c]));
+}
+
+function formData() {
+  return {
+    id: $('editId').value || crypto.randomUUID(),
+    stage: $('stage').value.trim(),
+    chapter: $('chapter').value.trim(),
+    title: $('title').value.trim(),
+    conditions: $('conditions').value.trim(),
+    cats: split($('cats').value),
+    tags: split($('tags').value),
+    status: $('status').value,
+    memo: $('memo').value.trim(),
+    visibility: $('visibility').value,
+    updated: new Date().toISOString()
+  };
+}
+
+$('entryForm').addEventListener('submit', e => {
+  e.preventDefault();
+
+  const item = formData();
+  const i = data.findIndex(x => x.id === item.id);
+
+  if (i >= 0) {
+    data[i] = item;
+  } else {
+    data.unshift(item);
+  }
+
+  persist();
+  resetForm();
+});
+
+function resetForm() {
+  $('entryForm').reset();
+  $('editId').value = '';
+  $('formTitle').textContent = '攻略を追加';
+}
+
+$('resetBtn').onclick = resetForm;
+
+function edit(id) {
+  const x = data.find(a => a.id === id);
+  if (!x) return;
+
+  $('editId').value = x.id;
+
+  ['stage', 'chapter', 'title', 'conditions',
+   'status', 'memo', 'visibility']
+    .forEach(k => $(k).value = x[k] || '');
+
+  $('cats').value = (x.cats || []).join(', ');
+  $('tags').value = (x.tags || []).join(', ');
+
+  $('formTitle').textContent = '攻略を編集';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function removeEntry(id) {
+  if (confirm('この攻略データを削除しますか？')) {
+    data = data.filter(x => x.id !== id);
+    persist();
+  }
+}
+
+function render() {
+  const q = $('search').value.toLowerCase();
+  const st = $('filterStatus').value;
+  const vis = $('filterVisibility').value;
+
+  const list = data.filter(x =>
+    (vis === 'all' || x.visibility === vis) &&
+    (!st || x.status === st) &&
+    [
+      x.stage, x.chapter, x.title, x.conditions, x.memo,
+      ...(x.cats || []), ...(x.tags || [])
+    ].join(' ').toLowerCase().includes(q)
+  );
+
+  $('entries').innerHTML = list.length
+    ? list.map(x => `
+      <article class="entry">
+        <h3>${escapeHtml(x.title)}</h3>
+
+        <div class="meta">
+          ${escapeHtml(x.stage)}
+          ${x.chapter ? ' ・ ' + escapeHtml(x.chapter) : ''}
+        </div>
+
+        ${x.conditions ? `
+          <p><b>条件：</b>${escapeHtml(x.conditions)}</p>
+        ` : ''}
+
+        ${x.cats?.length ? `
+          <p><b>編成：</b>${escapeHtml(x.cats.join('、'))}</p>
+        ` : ''}
+
+        ${x.tags?.length ? `
+          <div class="tags">
+            ${x.tags.map(t => `
+              <span class="tag">#${escapeHtml(t)}</span>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        ${x.memo ? `
+          <p>${escapeHtml(x.memo)}</p>
+        ` : ''}
+
+        <div class="entry-footer">
+          <span class="status">${escapeHtml(x.status)}</span>
+
+          <span class="status">
+            ${x.visibility === 'public' ? '公開' : '非公開'}
+          </span>
+
+          <button class="secondary"
+            onclick="edit('${x.id}')">編集</button>
+
+          <button class="danger"
+            onclick="removeEntry('${x.id}')">削除</button>
+        </div>
+      </article>
+    `).join('')
+    : `
+      <div class="empty">
+        該当する攻略がありません。<br>
+        左のフォームから追加できます。
+      </div>
+    `;
+}
+
+['search', 'filterStatus', 'filterVisibility']
+  .forEach(id => $(id).addEventListener('input', render));
+
+render();
+</script>
+</body>
+</html>
